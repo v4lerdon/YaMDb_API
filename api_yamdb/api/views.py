@@ -28,4 +28,3 @@ class CreateUserAPIView(APIView):
         #confirmation_code = default_token_generator.make_token(user)
         send_mail('Token api_yamdb', 'your token:', 'admin@yamdb.ru', ['baem-festa@yandex.ru'])
         return Response(serializer.data, status=status.HTTP_200_OK)
-                         

@@ -13,6 +13,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
+from django.db.models import Avg
 
 
 #регистрация нового пользователя
@@ -56,7 +57,7 @@ class UserTokenViewset(APIView):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
@@ -79,12 +80,13 @@ class GenreViewSet(viewsets.ModelViewSet):
         IsAdminOrReadOnly,
     )
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('title',) 
+    search_fields = ('title',)
     permission_classes = (
         IsAdminOrReadOnly,
     )

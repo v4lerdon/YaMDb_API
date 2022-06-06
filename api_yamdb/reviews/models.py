@@ -1,7 +1,5 @@
 from django.db import models
 
-<<<<<<< HEAD
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 ADMIN_ROLE = [
@@ -25,8 +23,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
-=======
->>>>>>> origin/titles
 
 class Category(models.Model):
     title = models.CharField(max_length=100)

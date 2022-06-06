@@ -5,10 +5,11 @@ from reviews.models import Category, Genre, Title
 from .serializers import TitleSerializer, CategorySerializer, GenreSerializer
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrAdminOrModerator
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Avg
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
@@ -31,12 +32,13 @@ class GenreViewSet(viewsets.ModelViewSet):
         IsAdminOrReadOnly,
     )
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('title',) 
+    search_fields = ('title',)
     permission_classes = (
         IsAdminOrReadOnly,
     )

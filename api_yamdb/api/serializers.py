@@ -10,8 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['email', 'username']
 
-        
-#селитизатор для токена
+
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255)
     confirmation_code = serializers.CharField()

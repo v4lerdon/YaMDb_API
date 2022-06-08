@@ -10,8 +10,9 @@ ADMIN_ROLE = [
 
 
 class User(AbstractUser):
-    username = models.CharField(db_index=True, max_length=255, unique=True)
-    email = models.EmailField(db_index=True, unique=True)
+    """Расширенная модель User."""
+    username = models.CharField(db_index=True, max_length=150, unique=True)
+    email = models.EmailField(db_index=True, unique=True, max_length=254)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
     bio = models.TextField(

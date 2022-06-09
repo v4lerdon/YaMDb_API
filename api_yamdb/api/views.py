@@ -49,25 +49,38 @@ class UsersSettingsViewset(viewsets.ModelViewSet):
 class UserSignupViewset(APIView):
     """Регистрация нового пользователя, получение кода."""
     permission_classes = (AllowAny,)
-    
-    def post(self, request):
-        serializer = UserSignupSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        if request.data['username'] == 'me':
-            return Response(
-                {'Использовать имя "me" в качестве username запрещено.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        serializer.save()
-        user = get_object_or_404(User, username=request.data['username'])
+
+    def tokensend(self, user, username, email):
         token = default_token_generator.make_token(user)
         send_mail(
                 'confirmation_code',
                 token,
                 'admin@yamdb.ru',
-                [serializer.validated_data['email']]
+                [email]
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        try:
+            username = request.data['username']
+            email = request.data['email']
+            user = User.objects.get(username=username, email=email)
+            self.tokensend(user, username, email)
+        except (KeyError, User.DoesNotExist):
+            serializer = UserSignupSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            username = request.data['username']
+            email = request.data['email']
+            if username == 'me':
+                return Response(
+                    {'Использовать имя "me" в качестве username запрещено.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user = serializer.save()
+            self.tokensend(user, username, email)
+        return Response(
+            {'username': username, 'email': email},
+            status=status.HTTP_200_OK
+        )
 
 
 class UserTokenViewset(APIView):

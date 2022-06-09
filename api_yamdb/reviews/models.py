@@ -18,7 +18,7 @@ class User(AbstractUser):
         'Биография',
         blank=True,
     )
-    role = models.CharField(max_length=15,choices=ADMIN_ROLE,default='user')
+    role = models.CharField(max_length=15, choices=ADMIN_ROLE, default='user')
 
     def __str__(self):
         return self.email

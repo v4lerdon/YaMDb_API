@@ -1,5 +1,4 @@
 import os
-
 from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -109,6 +108,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
 AUTH_USER_MODEL = 'reviews.User'
+
 
 # Email
 RECIPIENTS_EMAIL = ['manager@apiyambd.com']

@@ -15,9 +15,10 @@ from reviews.models import Category, Genre, Title, User
 
 from .mixins import ListCreateDestroyViewSet
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrAdminOrModerator
-from .serializers import CategorySerializer, GenreSerializer, TitleSerializer, TokenSerializer, UserMeSerializer, UserSignupSerializer, UsersSettingsSerializer
-
-from rest_framework.response import Response
+from .serializers import (CategorySerializer, GenreSerializer,
+                          ReadOnlyTitleSerializer, TitleSerializer,
+                          TokenSerializer, UserMeSerializer,
+                          UserSignupSerializer, UsersSettingsSerializer)
 
 
 class UserMeRetrieveUpdate(APIView):
@@ -59,10 +60,10 @@ class UserSignupViewset(APIView):
     def tokensend(self, user, username, email):
         token = default_token_generator.make_token(user)
         send_mail(
-                'confirmation_code',
-                token,
-                'admin@yamdb.ru',
-                [email]
+            'confirmation_code',
+            token,
+            'admin@yamdb.ru',
+            [email]
         )
 
     def post(self, request):
@@ -91,7 +92,7 @@ class UserSignupViewset(APIView):
 
 class UserTokenViewset(APIView):
     """Получение токена по коду."""
-    permission_classes = (AllowAny,)   
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
@@ -99,7 +100,9 @@ class UserTokenViewset(APIView):
         user = get_object_or_404(User, username=request.data['username'])
 
         if default_token_generator.check_token(
-            user, request.data['confirmation_code']):
+            user,
+            request.data['confirmation_code']
+        ):
             token = AccessToken.for_user(user)
             return Response(
                 {'token': str(token)}, status=status.HTTP_200_OK
@@ -121,8 +124,10 @@ class TitleViewSet(viewsets.ModelViewSet):
         IsAdminOrReadOnly,
     )
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+    def get_serializer_class(self):
+        if self.action in ('retrieve', 'list'):
+            return ReadOnlyTitleSerializer
+        return TitleSerializer
 
 
 class GenreViewSet(ListCreateDestroyViewSet):

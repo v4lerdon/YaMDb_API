@@ -29,6 +29,7 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
+    """Модель для категорий."""
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
 
@@ -37,6 +38,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель для жанров."""
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
 
@@ -45,6 +47,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель для произведений/тайтлов."""
     name = models.CharField(max_length=100)
     year = models.IntegerField(null=True, blank=True)
     description = models.CharField(max_length=200, blank=True)

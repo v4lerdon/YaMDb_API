@@ -9,6 +9,7 @@ class TokenSerializer(serializers.Serializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализация категорий."""
 
     class Meta:
         model = Category
@@ -20,6 +21,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализация жанров."""
 
     class Meta:
         model = Genre
@@ -31,6 +33,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализация тайтлов/произведений. Создание."""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         many=True,
@@ -40,7 +43,6 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all(),
     )
-    # rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
@@ -48,6 +50,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class ReadOnlyTitleSerializer(serializers.ModelSerializer):
+    """Сериализация тайтлов/произведений. Только просмотр."""
     rating = serializers.IntegerField(
         source='reviews__score__avg', read_only=True
     )

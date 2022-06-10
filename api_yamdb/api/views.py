@@ -114,6 +114,7 @@ class UserTokenViewset(APIView):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет для произведения/тайтла."""
     queryset = Title.objects.all()
     # queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
@@ -131,6 +132,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
+    """Вьюсет для жанров."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     pagination_class = LimitOffsetPagination
@@ -143,6 +145,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
+    """Вьюсет для категорий."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = LimitOffsetPagination

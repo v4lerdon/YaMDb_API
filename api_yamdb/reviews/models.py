@@ -93,7 +93,7 @@ class Review(models.Model):
             MinValueValidator(1)
         ])
     pub_date = models.DateTimeField(
-        'Дата добавления', auto_now_add=True, db_index=True)
+        verbose_name='Дата добавления', auto_now_add=True, db_index=True)
     
     class Meta:
         constraints = (
@@ -114,7 +114,7 @@ class Comment(models.Model):
         verbose_name='Автор публикации',
         help_text='Укажите автора публикации')
     review = models.ForeignKey(
-        Review(),
+        Review,
         on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Обзор, к которому относятся комментарий',
@@ -123,7 +123,7 @@ class Comment(models.Model):
         verbose_name='Текст комментария',
         help_text='Введите текст комментария')
     pub_date = models.DateTimeField(
-        'Дата добавления', auto_now_add=True, db_index=True)
+        verbose_name='Дата добавления', auto_now_add=True, db_index=True)
 
     class Meta:
         verbose_name = 'Комментарий'

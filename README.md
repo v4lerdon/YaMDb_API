@@ -5,7 +5,9 @@
 
 ## Разработчики
 1 Разработчик - Басков Михаил (baem-festa@yandex.ru)
+
 2 Разработчик - Юрченко Валерий (valerayurchenko14@yandex.ru) - Тимлид
+
 3 Разработчик - Grigory Plakhotnikov (ru-grigoriy@yandex.ru)
 
 ### Примеры эндпоинтов:

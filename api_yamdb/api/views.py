@@ -162,8 +162,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthorOrAdminOrModerator,)
-    # permission_classes = (IsAuthorModeratorOrReadOnly,)
-    # pagination_class = PageNumberPagination
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -183,8 +181,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthorOrAdminOrModerator,)
-    # permission_classes = (IsAuthorModeratorOrReadOnly,)
-    # pagination_class = PageNumberPagination
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(author=self.request.user, review_id=self.kwargs.get('review_id'))
+        

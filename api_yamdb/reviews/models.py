@@ -77,7 +77,7 @@ class Review(models.Model):
         verbose_name='Автор отзыва',
         help_text='Укажите автора отзыва')
     title = models.ForeignKey(
-        Title(),
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Произведение, к которому относится отзыв',

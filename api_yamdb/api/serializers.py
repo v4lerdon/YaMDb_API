@@ -1,11 +1,23 @@
 from rest_framework import serializers
+from rest_framework.relations import SlugRelatedField
+from reviews.models import Category, Genre, Title, User, Review, Comment
 
-from reviews.models import Category, Genre, Title, User
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date',)
 
 
-class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=255)
-    confirmation_code = serializers.CharField()
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True,
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
 
 
 class CategorySerializer(serializers.ModelSerializer):

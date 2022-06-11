@@ -10,15 +10,16 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
+from django.core.exceptions import ValidationError
 
-from reviews.models import Category, Genre, Title, User
+from reviews.models import Category, Genre, Title, User, Review, Comment
 
 from .mixins import ListCreateDestroyViewSet
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrAdminOrModerator
 from .serializers import (CategorySerializer, GenreSerializer,
                           ReadOnlyTitleSerializer, TitleSerializer,
-                          TokenSerializer, UserMeSerializer,
-                          UserSignupSerializer, UsersSettingsSerializer)
+                          TokenSerializer, UserMeSerializer, CommentSerializer,
+                          UserSignupSerializer, UsersSettingsSerializer, ReviewSerializer)
 
 
 class UserMeRetrieveUpdate(APIView):
@@ -155,3 +156,35 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     permission_classes = (
         IsAdminOrReadOnly,
     )
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAuthorOrAdminOrModerator,)
+    # permission_classes = (IsAuthorModeratorOrReadOnly,)
+    # pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get('title_id')
+        title = Title.objects.get(id=title_id)
+        if self.request.user.reviews.filter(title=title_id).exists():
+            raise ValidationError("К этому произведению уже оставлен отзыв.")
+        
+        serializer.save(author=self.request.user, title=title)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAuthorOrAdminOrModerator,)
+    # permission_classes = (IsAuthorModeratorOrReadOnly,)
+    # pagination_class = PageNumberPagination
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

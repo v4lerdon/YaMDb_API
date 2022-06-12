@@ -22,7 +22,7 @@ router.register(
 router.register('categories', CategoryViewSet)
 router.register('genres', GenreViewSet)
 router.register('titles', TitleViewSet)
-router.register(r'users', UsersSettingsViewset, basename='usersettings')
+router.register('users', UsersSettingsViewset, basename='usersettings')
 
 urlpatterns = [
     path('v1/auth/signup/', UserSignupViewset.as_view()),

@@ -21,6 +21,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           ReviewSerializer, TitleSerializer, TokenSerializer,
                           UserMeSerializer, UserSignupSerializer,
                           UsersSettingsSerializer)
+from api_yamdb.settings import DEFAULT_FROM_EMAIL
 
 
 class UserMeRetrieveUpdate(APIView):
@@ -64,8 +65,8 @@ class UserSignupViewset(APIView):
         send_mail(
             'confirmation_code',
             token,
-            'admin@yamdb.ru',
-            [email]
+            DEFAULT_FROM_EMAIL,
+            (email,)
         )
 
     def post(self, request):
@@ -120,7 +121,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().annotate(Avg('reviews__score'))
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
     permission_classes = (
         IsAdminOrReadOnly,

@@ -99,7 +99,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
     """Сериализация регистрации пользователя и создания нового."""
     class Meta:
         model = User
-        fields = ['email', 'username']
+        fields = ('email', 'username',)
 
 
 class TokenSerializer(serializers.Serializer):
@@ -121,14 +121,14 @@ class UsersSettingsSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = [
+        fields = (
             'username',
             'email',
             'first_name',
             'last_name',
             'bio',
-            'role'
-        ]
+            'role',
+        )
         model = User
 
 
@@ -146,11 +146,11 @@ class UserMeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
+        fields = (
             'username',
             'email',
             'first_name',
             'last_name',
             'bio',
-            'role'
-        ]
+            'role',
+        )

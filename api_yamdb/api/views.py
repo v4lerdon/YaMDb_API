@@ -5,12 +5,13 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.filters import SearchFilter
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 from django.core.exceptions import ValidationError
+from .filters import TitlesFilter
 
 from reviews.models import Category, Genre, Title, User, Review, Comment
 
@@ -116,12 +117,12 @@ class UserTokenViewset(APIView):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведения/тайтла."""
-    queryset = Title.objects.all()
-    # queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
+    queryset = Title.objects.all().annotate(Avg('reviews__score'))
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend, SearchFilter)
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    filter_backends = [DjangoFilterBackend]
+    # filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_class = TitlesFilter
     permission_classes = (
         IsAdminOrReadOnly,
     )
@@ -187,4 +188,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.is_valid(raise_exception=True)
         if get_object_or_404(Review, id=self.kwargs.get('review_id')):
-            serializer.save(author=self.request.user, review_id=self.kwargs.get('review_id'))
+            serializer.save(
+                author=self.request.user,
+                review_id=self.kwargs.get('review_id')
+            )

@@ -83,7 +83,8 @@ class TitleSerializer(serializers.ModelSerializer):
 class ReadOnlyTitleSerializer(serializers.ModelSerializer):
     """Сериализация тайтлов/произведений. Только просмотр."""
     rating = serializers.IntegerField(
-        source='reviews__score__avg', read_only=True
+        source='reviews__score__avg',
+        read_only=True
     )
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
@@ -96,7 +97,7 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
-    """ Сериализация регистрации пользователя и создания нового. """
+    """Сериализация регистрации пользователя и создания нового."""
     class Meta:
         model = User
         fields = ['email', 'username']

@@ -171,18 +171,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
         if self.request.user.reviews.filter(title=title_id).exists():
-            raise ValidationError("К этому произведению уже оставлен отзыв.")
-        
+            raise ValidationError("К этому произведению уже оставлен отзыв.")            
         serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthorOrAdminOrModerator,)
 
+    def get_queryset(self):
+        queryset = Comment.objects.filter(review_id=self.kwargs.get('review_id'))
+        return queryset
+
     def perform_create(self, serializer):
         serializer.is_valid(raise_exception=True)
-        serializer.save(author=self.request.user, review_id=self.kwargs.get('review_id'))
-        
+        if get_object_or_404(Review, id=self.kwargs.get('review_id')):
+            serializer.save(author=self.request.user, review_id=self.kwargs.get('review_id'))

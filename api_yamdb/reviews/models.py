@@ -11,19 +11,38 @@ ADMIN_ROLE = [
 
 class User(AbstractUser):
     """Расширенная модель User."""
-    username = models.CharField(db_index=True, max_length=150, unique=True)
-    email = models.EmailField(db_index=True, unique=True, max_length=254)
+    username = models.CharField(
+        db_index=True,
+        max_length=150,
+        unique=True,
+        verbose_name='Пользователь',
+        help_text='Укажите пользователя'
+    )
+    email = models.EmailField(
+        db_index=True,
+        unique=True,
+        max_length=254,
+        verbose_name='Email пользователя',
+        help_text='Укажите email пользователя'
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
     bio = models.TextField(
-        'Биография',
         blank=True,
+        verbose_name='Биография пользователя',
+        help_text='Напишите биографию пользователя'
     )
     role = models.CharField(
         max_length=15,
         choices=ADMIN_ROLE,
-        default='user'
+        default='user',
+        verbose_name='Роль пользователя',
+        help_text='Укажите роль пользователя'
     )
+
+    class Meta:
+        verbose_name = 'Пользователи'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self):
         return self.email
@@ -70,6 +89,7 @@ class Title(models.Model):
 
 
 class Review(models.Model):
+    """Модель отзывов для тайтлов."""
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -107,6 +127,7 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель комментариев по отзывам."""
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

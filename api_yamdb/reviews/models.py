@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 ADMIN_ROLE = [
     ('user', 'user'),
@@ -162,7 +162,7 @@ class Review(models.Model):
         ])
     pub_date = models.DateTimeField(
         verbose_name='Дата добавления', auto_now_add=True, db_index=True)
-    
+
     class Meta:
         constraints = (
             models.UniqueConstraint(fields=('author', 'title'),

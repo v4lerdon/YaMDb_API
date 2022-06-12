@@ -1,26 +1,26 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
-from rest_framework.filters import SearchFilter
-from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from django.core.exceptions import ValidationError
+
+from reviews.models import Category, Comment, Genre, Review, Title, User
+
 from .filters import TitlesFilter
-
-from reviews.models import Category, Genre, Title, User, Review, Comment
-
 from .mixins import ListCreateDestroyViewSet
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrAdminOrModerator
-from .serializers import (CategorySerializer, GenreSerializer,
-                          ReadOnlyTitleSerializer, TitleSerializer,
-                          TokenSerializer, UserMeSerializer, CommentSerializer,
-                          UserSignupSerializer, UsersSettingsSerializer, ReviewSerializer)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReadOnlyTitleSerializer,
+                          ReviewSerializer, TitleSerializer, TokenSerializer,
+                          UserMeSerializer, UserSignupSerializer,
+                          UsersSettingsSerializer)
 
 
 class UserMeRetrieveUpdate(APIView):
@@ -121,7 +121,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = [DjangoFilterBackend]
-    # filterset_fields = ('category', 'genre', 'name', 'year')
     filterset_class = TitlesFilter
     permission_classes = (
         IsAdminOrReadOnly,
@@ -172,7 +171,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
         if self.request.user.reviews.filter(title=title_id).exists():
-            raise ValidationError("К этому произведению уже оставлен отзыв.")            
+            raise ValidationError('К этому произведению уже оставлен отзыв.')
         serializer.save(author=self.request.user, title=title)
 
 
@@ -182,7 +181,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrAdminOrModerator,)
 
     def get_queryset(self):
-        queryset = Comment.objects.filter(review_id=self.kwargs.get('review_id'))
+        queryset = Comment.objects.filter(
+            review_id=self.kwargs.get('review_id')
+        )
         return queryset
 
     def perform_create(self, serializer):

@@ -1,3 +1,4 @@
+from rest_framework.generics import get_object_or_404
 from django.forms import ValidationError
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
@@ -26,14 +27,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
 
-    # def create(self, validated_data):
-    #     user = self.context['request'].user
-    #     title = validated_data['title']
-    #     if Review.objects.filter(author=user, title=title).count != 0:
-    #         raise ValidationError(
-    #             message='К этому произведению уже оставлен отзыв!',
-    #             code=status.HTTP_400_BAD_REQUEST
-    #         )
+    def validate(self, data):
+        request = self.context['request']
+        author = request.user
+        title_id = self.context['view'].kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title_id)
+        if request.method == 'POST':
+            if Review.objects.filter(title=title, author=author).exists():
+                raise ValidationError('К этому произведению'
+                                      'уже оставлен отзыв')
+        return data
 
 
 class CategorySerializer(serializers.ModelSerializer):

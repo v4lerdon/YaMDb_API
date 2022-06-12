@@ -50,8 +50,20 @@ class User(AbstractUser):
 
 class Category(models.Model):
     """Модель для категорий."""
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Название категории',
+        help_text='Укажите название категории'
+    )
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='слаг/slug',
+        help_text='Укажите слаг/slug'
+    )
+
+    class Meta:
+        verbose_name = 'Категории'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name
@@ -59,8 +71,22 @@ class Category(models.Model):
 
 class Genre(models.Model):
     """Модель для жанров."""
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True)
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name='Название жанра',
+        help_text='Укажите название жанра'
+    )
+    slug = models.SlugField(
+        max_length=100,
+        unique=True,
+        verbose_name='слаг/slug',
+        help_text='Укажите слаг/slug'
+    )
+
+    class Meta:
+        verbose_name = 'Жанры'
+        verbose_name_plural = 'Жанры'
 
     def __str__(self):
         return self.name
@@ -68,21 +94,43 @@ class Genre(models.Model):
 
 class Title(models.Model):
     """Модель для произведений/тайтлов."""
-    name = models.CharField(max_length=100)
-    year = models.IntegerField(null=True, blank=True)
-    description = models.CharField(max_length=200, blank=True)
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Название тайтла',
+        help_text='Укажите название тайтла'
+    )
+    year = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Год тайтла',
+        help_text='Укажите год тайтла'
+    )
+    description = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='Описание тайтла',
+        help_text='Укажите описание тайтла'
+    )
     genre = models.ManyToManyField(
         Genre,
         related_name='titles',
         blank=True,
+        verbose_name='Жанр тайтла',
+        help_text='Укажите жанр тайтла'
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
         blank=True,
-        null=True
+        null=True,
+        verbose_name='Категория тайтла',
+        help_text='Укажите категорию тайтла'
     )
+
+    class Meta:
+        verbose_name = 'Тайтлы'
+        verbose_name_plural = 'Тайтлы'
 
     def __str__(self):
         return self.name

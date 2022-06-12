@@ -2,22 +2,19 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-ADMIN_ROLE = [
-    ('user', 'user'),
-    ('admin', 'admin'),
-    ('moderator', 'moderator'),
-]
-
 
 class User(AbstractUser):
     """Расширенная модель User."""
-    username = models.CharField(
-        db_index=True,
-        max_length=150,
-        unique=True,
-        verbose_name='Пользователь',
-        help_text='Укажите пользователя'
-    )
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
+    ADMIN_ROLE = [
+        ('user', 'user'),
+        ('admin', 'admin'),
+        ('moderator', 'moderator'),
+    ]
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('username',)
     email = models.EmailField(
         db_index=True,
         unique=True,
@@ -25,8 +22,6 @@ class User(AbstractUser):
         verbose_name='Email пользователя',
         help_text='Укажите email пользователя'
     )
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
     bio = models.TextField(
         blank=True,
         verbose_name='Биография пользователя',
@@ -35,7 +30,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=15,
         choices=ADMIN_ROLE,
-        default='user',
+        default=USER,
         verbose_name='Роль пользователя',
         help_text='Укажите роль пользователя'
     )
@@ -43,6 +38,14 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователи'
         verbose_name_plural = 'Пользователи'
+
+    @property
+    def is_admin(self):
+        return self.is_staff or self.role == self.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
 
     def __str__(self):
         return self.email
@@ -99,7 +102,7 @@ class Title(models.Model):
         verbose_name='Название тайтла',
         help_text='Укажите название тайтла'
     )
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
         verbose_name='Год тайтла',
@@ -153,7 +156,7 @@ class Review(models.Model):
     text = models.TextField(
         verbose_name='Текст отзыва',
         help_text='Введите текст отзыва')
-    score = models.IntegerField(
+    score = models.PositiveSmallIntegerField(
         verbose_name='Оценка произведения от 1 до 10',
         help_text='Оцените произведение по шкале от 1 до 10',
         validators=[

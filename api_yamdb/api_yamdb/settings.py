@@ -1,5 +1,4 @@
 import os
-
 from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -23,8 +22,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'reviews.apps.ReviewsConfig',
-    'api.apps.ApiConfig',
+    'rest_framework',
+    'django_filters',
+    'api',
+    'reviews'
 ]
 
 MIDDLEWARE = [
@@ -106,21 +107,27 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
-# Authorization and JWT
-
 AUTH_USER_MODEL = 'reviews.User'
 
-JWT_AUTH = {
- 
-    'JWT_VERIFY': True,
-    'JWT_VERIFY_EXPIRATION': True,
-    'JWT_EXPIRATION_DELTA': timedelta(seconds=3000),
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
- 
-}
 
 # Email
 RECIPIENTS_EMAIL = ['manager@apiyambd.com']
-DEFAULT_FROM_EMAIL = 'admin@apiyambd.com' 
+DEFAULT_FROM_EMAIL = 'admin@apiyambd.com'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 4,
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=6),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}

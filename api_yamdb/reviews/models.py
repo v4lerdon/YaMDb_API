@@ -1,8 +1,6 @@
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.contrib.auth.models import (
-    AbstractBaseUser, PermissionsMixin, BaseUserManager
-)
-
 
 ADMIN_ROLE = [
     ('user', 'user'),
@@ -11,61 +9,194 @@ ADMIN_ROLE = [
 ]
 
 
-class UserManager(BaseUserManager):
-    """
-    Django требует, чтобы кастомные пользователи определяли свой собственный
-    класс Manager. Унаследовавшись от BaseUserManager, мы получаем много того
-    же самого кода, который Django использовал для создания User (для демонстрации).
-    """
-
-    def create_user(self, username, email, password=None):
-        """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
-        if username is None:
-            raise TypeError('Необходимо указать имя пользователя.')
-
-        if email is None:
-            raise TypeError('Необходимо указать email пользователя.')
-
-        user = self.model(username=username, email=self.normalize_email(email))
-        user.set_password(password)
-        user.save()
-
-        return user
-
-    def create_superuser(self, username, email, password):
-        """ Создает и возввращет пользователя с привилегиями суперадмина. """
-        if password is None:
-            raise TypeError('Необходимо задать пароль суперпользователю.')
-
-        user = self.create_user(username, email, password)
-        user.is_superuser = True
-        user.is_staff = True
-        user.save()
-
-        return user
-
-
-class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(db_index=True, max_length=255, unique=True)
-    email = models.EmailField(db_index=True, unique=True)
-
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)    
-    bio = models.TextField(
-        'Биография',
-        blank=True,
+class User(AbstractUser):
+    """Расширенная модель User."""
+    username = models.CharField(
+        db_index=True,
+        max_length=150,
+        unique=True,
+        verbose_name='Пользователь',
+        help_text='Укажите пользователя'
     )
-    role = models.CharField(max_length=15,choices=ADMIN_ROLE,default='user')
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+    email = models.EmailField(
+        db_index=True,
+        unique=True,
+        max_length=254,
+        verbose_name='Email пользователя',
+        help_text='Укажите email пользователя'
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    
-    objects = UserManager()
+    bio = models.TextField(
+        blank=True,
+        verbose_name='Биография пользователя',
+        help_text='Напишите биографию пользователя'
+    )
+    role = models.CharField(
+        max_length=15,
+        choices=ADMIN_ROLE,
+        default='user',
+        verbose_name='Роль пользователя',
+        help_text='Укажите роль пользователя'
+    )
+
+    class Meta:
+        verbose_name = 'Пользователи'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self):
-        """ Строковое представление модели (отображается в консоли) """
         return self.email
+
+
+class Category(models.Model):
+    """Модель для категорий."""
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Название категории',
+        help_text='Укажите название категории'
+    )
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='слаг/slug',
+        help_text='Укажите слаг/slug'
+    )
+
+    class Meta:
+        verbose_name = 'Категории'
+        verbose_name_plural = 'Категории'
+
+    def __str__(self):
+        return self.name
+
+
+class Genre(models.Model):
+    """Модель для жанров."""
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name='Название жанра',
+        help_text='Укажите название жанра'
+    )
+    slug = models.SlugField(
+        max_length=100,
+        unique=True,
+        verbose_name='слаг/slug',
+        help_text='Укажите слаг/slug'
+    )
+
+    class Meta:
+        verbose_name = 'Жанры'
+        verbose_name_plural = 'Жанры'
+
+    def __str__(self):
+        return self.name
+
+
+class Title(models.Model):
+    """Модель для произведений/тайтлов."""
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Название тайтла',
+        help_text='Укажите название тайтла'
+    )
+    year = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Год тайтла',
+        help_text='Укажите год тайтла'
+    )
+    description = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='Описание тайтла',
+        help_text='Укажите описание тайтла'
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        related_name='titles',
+        blank=True,
+        verbose_name='Жанр тайтла',
+        help_text='Укажите жанр тайтла'
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        blank=True,
+        null=True,
+        verbose_name='Категория тайтла',
+        help_text='Укажите категорию тайтла'
+    )
+
+    class Meta:
+        verbose_name = 'Тайтлы'
+        verbose_name_plural = 'Тайтлы'
+
+    def __str__(self):
+        return self.name
+
+
+class Review(models.Model):
+    """Модель отзывов для тайтлов."""
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Автор отзыва',
+        help_text='Укажите автора отзыва')
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Произведение, к которому относится отзыв',
+        help_text='Укажите произведение, к которому относятся отзыв')
+    text = models.TextField(
+        verbose_name='Текст отзыва',
+        help_text='Введите текст отзыва')
+    score = models.IntegerField(
+        verbose_name='Оценка произведения от 1 до 10',
+        help_text='Оцените произведение по шкале от 1 до 10',
+        validators=[
+            MaxValueValidator(10),
+            MinValueValidator(1)
+        ])
+    pub_date = models.DateTimeField(
+        verbose_name='Дата добавления', auto_now_add=True, db_index=True)
+
+    class Meta:
+        constraints = (
+            models.UniqueConstraint(fields=('author', 'title'),
+                                    name='unique_review'),)
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+
+    def __str__(self):
+        return self.text[:15]
+
+
+class Comment(models.Model):
+    """Модель комментариев по отзывам."""
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор публикации',
+        help_text='Укажите автора публикации')
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Обзор, к которому относятся комментарий',
+        help_text='Укажите обзор, к которому относятся комментарии')
+    text = models.TextField(
+        verbose_name='Текст комментария',
+        help_text='Введите текст комментария')
+    pub_date = models.DateTimeField(
+        verbose_name='Дата добавления', auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text[:15]

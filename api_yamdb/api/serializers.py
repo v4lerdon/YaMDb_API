@@ -97,9 +97,37 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
 
 class UserSignupSerializer(serializers.ModelSerializer):
     """Сериализация регистрации пользователя и создания нового."""
+    username = serializers.SlugField(
+        max_length=150,
+        required=True
+    )
+    email = serializers.EmailField(
+        max_length=254,
+        required=True
+    )
+
     class Meta:
         model = User
-        fields = ('email', 'username',)
+        fields = ('email', 'username')
+
+    def validate(self, data):        
+        if User.objects.filter(
+                username=data['username'],
+                email=data['email']).exists():
+            return data
+        if User.objects.filter(username=data['username']).exists():
+            raise serializers.ValidationError(
+                'Пользователь с таким именем существует.'
+            )
+        if User.objects.filter(email=data['email']).exists():
+            raise serializers.ValidationError(
+                'Пользователь с таким email существует.'
+            )
+        if data['username'] == 'me':
+            raise serializers.ValidationError(
+                'Использовать имя "me" в качестве username запрещено.'
+            )
+        return data
 
 
 class TokenSerializer(serializers.Serializer):

@@ -70,23 +70,17 @@ class UserSignupViewset(APIView):
         )
 
     def post(self, request):
-        try:
-            username = request.data['username']
-            email = request.data['email']
-            user = User.objects.get(username=username, email=email)
-            self.tokensend(user, username, email)
-        except (KeyError, User.DoesNotExist):
-            serializer = UserSignupSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            username = request.data['username']
-            email = request.data['email']
-            if username == 'me':
-                return Response(
-                    {'Использовать имя "me" в качестве username запрещено.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            user = serializer.save()
-            self.tokensend(user, username, email)
+        serializer = UserSignupSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data['username']
+        email = serializer.validated_data['email']
+        user, create = User.objects.get_or_create(
+            username=username,
+            email=email,
+        )
+        if create:
+            user.save()
+        self.tokensend(user, username, email)
         return Response(
             {'username': username, 'email': email},
             status=status.HTTP_200_OK

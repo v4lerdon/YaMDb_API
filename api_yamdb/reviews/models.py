@@ -9,9 +9,9 @@ class User(AbstractUser):
     MODERATOR = 'moderator'
     USER = 'user'
     ADMIN_ROLE = [
-        ('user', 'user'),
-        ('admin', 'admin'),
-        ('moderator', 'moderator'),
+        (USER, 'user'),
+        (ADMIN, 'admin'),
+        (MODERATOR, 'moderator'),
     ]
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('username',)

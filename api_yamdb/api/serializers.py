@@ -110,7 +110,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'username')
 
-    def validate(self, data):        
+    def validate(self, data):
         if User.objects.filter(
                 username=data['username'],
                 email=data['email']).exists():
